@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  tts-server-piper:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "5556:5556"
+    volumes:
+      - ./models:/data/piper
+    environment:
+      - PIPER_HOST=0.0.0.0
+      - PIPER_PORT=5556
+      - PIPER_CACHE_DIR=/data/piper
+      - PIPER_LOG_LEVEL=INFO

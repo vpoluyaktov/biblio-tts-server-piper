@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  tts-server-piper:
+    image: vpoluyaktov/biblio-tts-server-piper:latest
+    ports:
+      - "5556:5556"
+    volumes:
+      - piper-data:/data/piper
+    environment:
+      - PIPER_HOST=0.0.0.0
+      - PIPER_PORT=5556
+      - PIPER_CACHE_DIR=/data/piper
+      - PIPER_LOG_LEVEL=INFO
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+volumes:
+  piper-data:

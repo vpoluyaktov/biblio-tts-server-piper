@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+
+# Virtual environments
+venv
+env
+ENV
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov
+
+# Models (downloaded at runtime)
+models/
+*.onnx
+*.onnx.json
+voices.json
+
+# Documentation
+*.md
+!README.md
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Misc
+.DS_Store
+*.log

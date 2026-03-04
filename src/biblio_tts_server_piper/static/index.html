@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblio TTS Server (Piper)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        header p {
+            color: #888;
+            margin-top: 5px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #aaa;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        select:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .col {
+            flex: 1;
+            min-width: 200px;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        #audio-player {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        .status.error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff6b6b;
+            display: block;
+        }
+        .status.success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            color: #69db7c;
+            display: block;
+        }
+        .status.loading {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            display: block;
+        }
+        .voice-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+        footer a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .slider-group input[type="range"] {
+            flex: 1;
+        }
+        .slider-group .value {
+            min-width: 50px;
+            text-align: right;
+            color: #00d4ff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔊 Biblio TTS Server (Piper)</h1>
+            <p>Part of BiblioHub - Text-to-Speech powered by Piper models</p>
+        </header>
+
+        <div class="card">
+            <div class="form-group">
+                <label for="text-input">Text to speak</label>
+                <textarea id="text-input" placeholder="Enter text to synthesize...">Hello! This is a test of the Piper text-to-speech system.</textarea>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="language-select">Language</label>
+                        <select id="language-select"></select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="voice-select">Voice</label>
+                        <select id="voice-select"></select>
+                        <div class="voice-info" id="voice-info"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="speed-slider">Speed</label>
+                        <div class="slider-group">
+                            <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+                            <span class="value" id="speed-value">1.0x</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="speak-btn" class="btn-primary">🔊 Speak</button>
+                <button id="stop-btn" class="btn-secondary">⏹ Stop</button>
+                <button id="download-btn" class="btn-secondary" disabled>💾 Download</button>
+            </div>
+
+            <div id="status" class="status"></div>
+
+            <audio id="audio-player" controls style="display: none;"></audio>
+        </div>
+
+        <footer>
+            <p>
+                <a href="/docs">API Documentation</a> · 
+                <a href="/api/voices">Voices API</a> · 
+                <a href="/api/languages">Languages API</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        const BASE_PATH = '';
+        
+        function apiUrl(path) {
+            return BASE_PATH + path;
+        }
+
+        const textInput = document.getElementById('text-input');
+        const languageSelect = document.getElementById('language-select');
+        const voiceSelect = document.getElementById('voice-select');
+        const voiceInfo = document.getElementById('voice-info');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        const speakBtn = document.getElementById('speak-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const audioPlayer = document.getElementById('audio-player');
+        const statusDiv = document.getElementById('status');
+
+        let allVoices = [];
+        let currentAudioUrl = null;
+
+        function showStatus(message, type) {
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+
+        function hideStatus() {
+            statusDiv.className = 'status';
+        }
+
+        speedSlider.addEventListener('input', () => {
+            speedValue.textContent = speedSlider.value + 'x';
+        });
+
+        async function loadLanguages() {
+            try {
+                const response = await fetch(apiUrl('/api/languages'));
+                const languages = await response.json();
+                
+                languageSelect.innerHTML = '';
+                languages.sort().forEach(lang => {
+                    const option = document.createElement('option');
+                    option.value = lang;
+                    option.textContent = lang.toUpperCase();
+                    if (lang === 'en') option.selected = true;
+                    languageSelect.appendChild(option);
+                });
+
+                await loadVoices();
+            } catch (error) {
+                showStatus('Failed to load languages: ' + error.message, 'error');
+            }
+        }
+
+        async function loadVoices() {
+            const language = languageSelect.value;
+            
+            showStatus('Loading voices...', 'loading');
+            
+            try {
+                const response = await fetch(apiUrl('/api/voices?language=' + encodeURIComponent(language)));
+                allVoices = await response.json();
+
+                voiceSelect.innerHTML = '';
+                allVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.id;
+                    option.textContent = `${voice.name} [${voice.quality}]`;
+                    voiceSelect.appendChild(option);
+                });
+
+                updateVoiceInfo();
+                hideStatus();
+            } catch (error) {
+                showStatus('Failed to load voices: ' + error.message, 'error');
+            }
+        }
+
+        function updateVoiceInfo() {
+            const selectedVoice = allVoices.find(v => v.id === voiceSelect.value);
+            if (selectedVoice) {
+                voiceInfo.textContent = `Model: ${selectedVoice.model_id} | Quality: ${selectedVoice.quality}`;
+            } else {
+                voiceInfo.textContent = '';
+            }
+        }
+
+        async function speak() {
+            const text = textInput.value.trim();
+            if (!text) {
+                showStatus('Please enter some text', 'error');
+                return;
+            }
+
+            const voice = voiceSelect.value;
+            const speed = parseFloat(speedSlider.value);
+
+            speakBtn.disabled = true;
+            showStatus('Generating speech...', 'loading');
+
+            try {
+                const params = new URLSearchParams({
+                    voice: voice,
+                    text: text,
+                    speed: speed
+                });
+
+                const response = await fetch(apiUrl('/api/tts?' + params.toString()));
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'TTS request failed');
+                }
+
+                const blob = await response.blob();
+                
+                if (currentAudioUrl) {
+                    URL.revokeObjectURL(currentAudioUrl);
+                }
+                
+                currentAudioUrl = URL.createObjectURL(blob);
+                audioPlayer.src = currentAudioUrl;
+                audioPlayer.style.display = 'block';
+                audioPlayer.play();
+                
+                downloadBtn.disabled = false;
+                showStatus('Speech generated successfully!', 'success');
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            } finally {
+                speakBtn.disabled = false;
+            }
+        }
+
+        function stopAudio() {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+        }
+
+        function downloadAudio() {
+            if (currentAudioUrl) {
+                const a = document.createElement('a');
+                a.href = currentAudioUrl;
+                a.download = 'tts_output.wav';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        }
+
+        languageSelect.addEventListener('change', loadVoices);
+        voiceSelect.addEventListener('change', updateVoiceInfo);
+        speakBtn.addEventListener('click', speak);
+        stopBtn.addEventListener('click', stopAudio);
+        downloadBtn.addEventListener('click', downloadAudio);
+
+        textInput.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                speak();
+            }
+        });
+
+        loadLanguages();
+    </script>
+</body>
+</html>
