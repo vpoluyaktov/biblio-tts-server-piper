@@ -254,7 +254,14 @@ class PiperTTSService:
         model_key = voice_parts[0]
         
         if len(voice_parts) > 1 and speaker_id is None:
-            speaker_id = int(voice_parts[1])
+            # Handle both numeric speaker IDs and "default"
+            speaker_part = voice_parts[1]
+            if speaker_part.lower() != "default":
+                try:
+                    speaker_id = int(speaker_part)
+                except ValueError:
+                    # If not a number and not "default", use None
+                    speaker_id = None
         
         model_path = self._loaded_models.get(model_key)
         if model_path is None:
