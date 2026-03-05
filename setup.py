@@ -5,7 +5,8 @@ from pathlib import Path
 from setuptools import find_packages, setup
 
 this_directory = Path(__file__).parent
-long_description = (this_directory / "README.md").read_text()
+readme_file = this_directory / "README.md"
+long_description = readme_file.read_text() if readme_file.exists() else "REST API server for Piper TTS models"
 
 setup(
     name="biblio-tts-server-piper",
