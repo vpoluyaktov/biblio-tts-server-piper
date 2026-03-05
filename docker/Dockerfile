@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN wget -O /tmp/piper.tar.gz https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_amd64.tar.gz \
     && tar -xzf /tmp/piper.tar.gz -C /usr/local/bin \
     && rm /tmp/piper.tar.gz \
-    && chmod +x /usr/local/bin/piper
+    && chmod +x /usr/local/bin/piper \
+    && ls -la /usr/local/bin/piper
 
 COPY requirements.txt .
 
