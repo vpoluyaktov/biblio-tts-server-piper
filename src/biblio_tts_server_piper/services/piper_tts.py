@@ -103,8 +103,24 @@ class PiperTTSService:
             raise ValueError(f"Model {model_key} not found in voices catalog")
         
         model_info = voices[model_key]
-        model_url = model_info["files"][".onnx"]
-        config_url = model_info["files"][".onnx.json"]
+        
+        # Find the .onnx and .onnx.json files in the files dictionary
+        # Keys are full paths like "en/en_US/lessac/medium/en_US-lessac-medium.onnx"
+        onnx_file = None
+        config_file_key = None
+        base_url = "https://huggingface.co/rhasspy/piper-voices/resolve/main/"
+        
+        for file_path in model_info["files"].keys():
+            if file_path.endswith(".onnx.json"):
+                config_file_key = file_path
+            elif file_path.endswith(".onnx"):
+                onnx_file = file_path
+        
+        if not onnx_file or not config_file_key:
+            raise ValueError(f"Model files not found for {model_key}")
+        
+        model_url = base_url + onnx_file
+        config_url = base_url + config_file_key
         
         model_file = self._models_dir / f"{model_key}.onnx"
         config_file = self._models_dir / f"{model_key}.onnx.json"
