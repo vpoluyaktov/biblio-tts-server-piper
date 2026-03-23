@@ -2,7 +2,8 @@
 
 > Part of the [BiblioHub](https://github.com/vpoluyaktov/biblio-hub) application suite
 
-![Biblio TTS Server Piper](docs/images/tts-piper-screenshot.png)
+<img width="995" height="654" alt="Screenshot 2026-03-22 at 23 03 34" src="https://github.com/user-attachments/assets/f75682cc-0d48-40b7-a4a8-4836c0239aaa" />
+
 
 REST service for [Piper](https://github.com/rhasspy/piper) text-to-speech synthesis with support for 40+ languages and hundreds of voices. Written in Python.
 
